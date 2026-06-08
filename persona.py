@@ -216,6 +216,9 @@ class Persona(Base):
             Help me polish this and create a more natural persona profile.
 
             You MUST NOT add information (such as name) to the profile. AVOID omitting any information, including the adjectives.
+            The only exception is when the information contains **range values**, such as "0-3 years of teaching experience".
+            In this case, you should change the range value to a precise value, such as "2 years of teaching experience".
+
             Instead of "This person...", use "You ..." to describe the person.
             Only rearrange and polish the language, but no fancy expressions.
             Your response should ONLY contain the polished persona profile. """
