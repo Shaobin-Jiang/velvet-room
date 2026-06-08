@@ -2,12 +2,15 @@ import json
 
 import asyncio
 import random
+import resource
+
 from textwrap import dedent
 from typing import Dict, List
+from tqdm import tqdm
 
 from base import Base
 from persona import Persona
-from typings import ModelConfig, ConstructValuePrettyName
+from typings import ConstructValuePrettyName, ModelConfig, Profile
 
 
 class Scaffold(Base):
@@ -40,16 +43,23 @@ class Scaffold(Base):
         super().__init__(model_config)
         self._number = number
         self._description = description
+        self._dimensions: Dict[str, List[str]] = {}
 
-    def create_sync(self) -> List[str]:
+    @property
+    def dimensions(self) -> Dict[str, List[str]]:
+        return self._dimensions
+
+    def create_sync(self) -> List[Profile]:
         """Run profile generation in a synchronous context."""
         return asyncio.run(self.create())
 
-    async def create(self) -> List[str]:
+    async def create(self) -> List[Profile]:
         """Generate persona profiles."""
-        dimensions = await self._analyze_description()
+        pbar = tqdm(total=self._number)
+
+        self._dimensions = await self._analyze_description()
         combinations = {}
-        for dimension, values in dimensions.items():
+        for dimension, values in self._dimensions.items():
             combinations[dimension] = []
             quotient = self._number // len(values)
             remainder = self._number % len(values)
@@ -58,14 +68,30 @@ class Scaffold(Base):
                 combinations[dimension].extend([value] * count)
             random.shuffle(combinations[dimension])
 
-        profiles: List[str] = []
+        profiles: List[Profile] = []
+
+        _, limit = resource.getrlimit(resource.RLIMIT_NOFILE)
+        resource.setrlimit(resource.RLIMIT_NOFILE, (2048, limit))
+
+        semaphore = asyncio.Semaphore(min(limit, 200, self._number))
+
+        async def worker(index: int, dimension_map: Dict[str, str]):
+            async with semaphore:
+                persona = Persona(self._description, dimension_map, self._model_config)
+                await persona._create()
+                profiles[index] = {"map": persona.map, "profile": persona.profile}
+                pbar.update(1)
+
+        tasks = []
         for i in range(0, self._number):
             dimension_map = {}
+            profiles.append({"map": {}, "profile": ""})
             for dimension, values in combinations.items():
                 dimension_map[dimension] = values[i]
-            persona = Persona(self._description, dimension_map, self._model_config)
-            await persona._create()
-            profiles.append(persona.profile)
+            tasks.append(worker(i, dimension_map))
+
+        await asyncio.gather(*tasks)
+        pbar.close()
 
         return profiles
 

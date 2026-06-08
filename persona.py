@@ -32,6 +32,10 @@ class Persona(Base):
 
         self.profile = ""
 
+    @property
+    def map(self) -> Dict[str, str]:
+        return self._dimensions | self._constructs_json
+
     async def _create(self) -> None:
         """Execute the full persona-building pipeline in sequence."""
         self._create_base_profile()
