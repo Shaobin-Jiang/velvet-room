@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, TypedDict
+from typing import TypedDict
 
 ConstructValuePrettyName = {
     "age": ["young", "old"],
@@ -28,5 +28,5 @@ class ModelConfig(TypedDict):
 
 
 class Profile(TypedDict):
-    map: Dict[str, str]
+    map: dict[str, str]
     profile: str

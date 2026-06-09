@@ -5,7 +5,6 @@ import random
 import resource
 
 from textwrap import dedent
-from typing import Dict, List
 from tqdm import tqdm
 
 from base import Base
@@ -43,17 +42,17 @@ class Scaffold(Base):
         super().__init__(model_config)
         self._number = number
         self._description = description
-        self._dimensions: Dict[str, List[str]] = {}
+        self._dimensions: dict[str, list[str]] = {}
 
     @property
-    def dimensions(self) -> Dict[str, List[str]]:
+    def dimensions(self) -> dict[str, list[str]]:
         return self._dimensions
 
-    def create_sync(self) -> List[Profile]:
+    def create_sync(self) -> list[Profile]:
         """Run profile generation in a synchronous context."""
         return asyncio.run(self.create())
 
-    async def create(self) -> List[Profile]:
+    async def create(self) -> list[Profile]:
         """Generate persona profiles."""
         pbar = tqdm(total=self._number)
 
@@ -68,14 +67,14 @@ class Scaffold(Base):
                 combinations[dimension].extend([value] * count)
             random.shuffle(combinations[dimension])
 
-        profiles: List[Profile] = []
+        profiles: list[Profile] = []
 
         _, limit = resource.getrlimit(resource.RLIMIT_NOFILE)
         resource.setrlimit(resource.RLIMIT_NOFILE, (2048, limit))
 
         semaphore = asyncio.Semaphore(min(limit, 200, self._number))
 
-        async def worker(index: int, dimension_map: Dict[str, str]):
+        async def worker(index: int, dimension_map: dict[str, str]):
             async with semaphore:
                 persona = Persona(self._description, dimension_map, self._model_config)
                 await persona._create()
@@ -95,7 +94,7 @@ class Scaffold(Base):
 
         return profiles
 
-    async def _analyze_description(self) -> Dict[str, List[str]]:
+    async def _analyze_description(self) -> dict[str, list[str]]:
         """
         Analyzes the provided profile description and returns the dimensions with which
         the desired group can be depicted.
@@ -130,7 +129,7 @@ class Scaffold(Base):
         def rule(response: str) -> bool:
             is_valid = True
             try:
-                obj: Dict[str, List[str]] = json.loads(response)
+                obj: dict[str, list[str]] = json.loads(response)
                 if len(obj.keys()) < 5:
                     is_valid = False
                 for values in obj.values():

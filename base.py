@@ -1,5 +1,5 @@
 from openai import AsyncOpenAI
-from typing import Callable, Dict, List
+from typing import Callable
 
 from typings import ModelConfig
 
@@ -8,7 +8,7 @@ class Base:
     def __init__(self, model_config: ModelConfig) -> None:
         """Initialize shared model configuration and in-memory request logs."""
         self._model_config = model_config
-        self._logs: Dict[str, List[str]] = {}
+        self._logs: dict[str, list[str]] = {}
 
     async def _get_response(self, prompt: str, validate: Callable[[str], bool]) -> str:
         """

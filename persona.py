@@ -3,7 +3,6 @@ import linecache
 import random
 
 from textwrap import dedent
-from typing import Dict
 
 from base import Base
 from typings import ModelConfig, ConstructValuePrettyName
@@ -13,7 +12,7 @@ class Persona(Base):
     """Generates a single persona profile."""
 
     def __init__(
-        self, description: str, dimensions: Dict[str, str], model_config: ModelConfig
+        self, description: str, dimensions: dict[str, str], model_config: ModelConfig
     ) -> None:
         """
         Initializes the `Persona` class with these parameters:
@@ -33,7 +32,7 @@ class Persona(Base):
         self.profile = ""
 
     @property
-    def map(self) -> Dict[str, str]:
+    def map(self) -> dict[str, str]:
         return self._dimensions | self._constructs_json
 
     async def _create(self) -> None:
@@ -121,7 +120,7 @@ class Persona(Base):
         def rule(response: str) -> bool:
             is_valid = True
             try:
-                obj: Dict[str, str] = json.loads(response)
+                obj: dict[str, str] = json.loads(response)
                 if len(obj.keys()) != len(ConstructValuePrettyName.keys()):
                     is_valid = False
                 for construct, value in obj.items():
@@ -186,7 +185,7 @@ class Persona(Base):
         def rule(response: str) -> bool:
             is_valid = True
             try:
-                obj: Dict[str, str] = json.loads(response)
+                obj: dict[str, str] = json.loads(response)
                 if len(obj.keys()) != len(ConstructValuePrettyName.keys()):
                     is_valid = False
                 for construct, value in obj.items():
