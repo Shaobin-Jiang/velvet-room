@@ -16,12 +16,13 @@ class Scaffold(Base):
     """Generates a number of persona profiles as requested."""
 
     def __init__(
-        self, description: str, number: int, model_config: ModelConfig
+        self, description: str, scenario: str, number: int, model_config: ModelConfig
     ) -> None:
         """
         Initializes the `Scaffold` class with these parameters:
 
         - description: describes the group of agents whose profiles you want to create
+        - scenario: what simulation is the group of agents used for
         - number: the number of persona profiles you want to create
         - model_config: LLM configuration
 
@@ -30,6 +31,7 @@ class Scaffold(Base):
         ```python
         Scaffold(
             "high school teachers",
+            'should high school teachers play the traditional "strict teacher" or the "friendly peer" role',
             100,
             {
                 "base_url": "http://api.com/v1",
@@ -42,6 +44,7 @@ class Scaffold(Base):
         super().__init__(model_config)
         self._number = number
         self._description = description
+        self._scenario = scenario
         self._dimensions: dict[str, list[str]] = {}
 
     @property
@@ -120,6 +123,7 @@ class Scaffold(Base):
             - these dimensions should be orthogonal with each other
             - these dimensions better be factual instead of mental attributes
             - these dimensions must not be one of {exclude_dimensions}
+            - some of these dimensions should be related to the topic "{self._scenario}"
             - your response must be a JSON object that looks like this:
             {{"D1": ["v1", "v2", ...], "D2": ["v3", "v4", ...]}}
 
