@@ -18,9 +18,15 @@ class Base:
         """
         if prompt not in self._logs:
             self._logs[prompt] = []
+        print(f">>> prompt: \033[31m{prompt}\033[0m")
+        attempt = 1
         response = await self._call_llm(prompt)
+        print(f">>> Attempt 1: \033[36m{response}\033[0m")
         while not validate(response):
             response = await self._call_llm(prompt)
+            attempt += 1
+            print(f">>> Attempt {attempt}: \033[36m{response}\033[0m")
+        print("--------------------")
         return response
 
     async def _call_llm(self, prompt: str) -> str:
@@ -46,7 +52,4 @@ class Base:
             except:
                 success = False
         self._logs[prompt].append(response)
-        print(f">>> {prompt}")
-        print(f">>> {response}")
-        print("========================================")
         return response
