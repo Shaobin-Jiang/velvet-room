@@ -15,6 +15,7 @@ Create a large number of persona profiles while ensuring the quality, authentici
 ```python
 s = Scaffold(
     "high school teachers",
+    'should high school teachers play the traditional "strict teacher" or the "friendly peer" role',
     100, 
     {"base_url": "http://127.0.0.1:8000/v1", "api_key": "****", "model": "gemma"}
 )
